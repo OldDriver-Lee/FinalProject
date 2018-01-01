@@ -58,6 +58,85 @@ slotMachine::slotMachine()//先把上面定義的private的值設定好
 	gameCost = 2;
 }
 
+bool slotMachine::displayMenu(void)//目錄
+{
+	char choice = 'Z';
+	bool continueGame = true;
+	if (moneyInMachine == 0)//先判斷機台裡面有沒有錢
+	{
+		cout << "Congratulations. You hit the jackpot" << endl;
+		cout << "That start NEW games!" << endl;
+		moneyInMachine = rand() % 200 + 100;
+		cout << "We put $" << moneyInMachine << " into the machine" << endl;
+		cout << "Good Luck To You" << endl;
+	}
+	if (moneyInPeople < 2 && pullTimes == 0)//判斷有沒有破產
+	{
+		displayStatus();
+		cout << "Now you are Bankruptcy" << endl;
+		cout << "Get out of my store" << endl << endl;
+		continueGame = false;
+		return continueGame;
+	}
+	else//沒有破產則開始選擇動作
+	{
+		cout << "---------------------------------------------------" << endl;
+		cout << "\n(E)nd, (P)ull, P(A)Y, (S)tatus :";
+		cin >> choice;//輸入你要選擇的
+		switch (choice) {
+		case 'e':
+		case 'E'://結束
+			continueGame = false;
+			break;
+		case 'a':
+		case 'A'://投入金額
+			int money;
+			cout << "\nHow much would you want to put in?\n";
+			cin >> money;
+			if (money <= moneyInPeople)//投入金額一定要小於等於自身擁有的金額
+			{
+				if (money % 2 == 0)//我們是 2$ 1次 所以只能投2的倍數 
+				{
+					cout << "Put $" << money << " into the machine" << endl;
+					moneyPaid = money;
+					pullTimes += (moneyPaid / gameCost);
+					cout << "Now you have " << pullTimes << " Pull times\n" << endl;
+					insertCoin(money);
+				}
+				else
+				{
+					cout << "Please put even money" << endl;
+				}
+			}
+			else
+			{
+				cout << "You have no enough money" << endl << endl;
+			}
+			break;
+		case 'p':
+		case 'P'://使用拉霸
+			if (pullHandle())
+			{
+				cout << endl;
+				pullTimes -= 1;
+				displaySpinResults();
+				cout << "Payout: $" << calculatePayout() << endl << endl;
+			}
+			else
+			{
+				cout << "\nYou have no money in Machine" << endl;
+				cout << "Please choice (A) to put money in" << endl << endl;
+			}
+			break;
+		case 'S':
+		case 's'://查看目前的狀態
+			displayStatus();
+			break;
+		}
+		return continueGame;
+	}
+}
+
 double slotMachine::calculatePayout()//如果有用到3個一樣的數字，會得到金額
 {
 	if (wheelA == wheelB  && wheelA == wheelC)
